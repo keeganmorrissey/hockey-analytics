@@ -60,15 +60,18 @@ for (game in unique(data$Game_Id)) {
    
 }
 
+write.csv(shift_matrix, 'shift_matrix_20152016.csv', row.names = F)
 
 boxscore_data <- read.csv('nhl_pbp_20152016.csv')
 
 goal_data <- boxscore_data[boxscore_data$Event == 'GOAL', ]
 goal_data$Seconds_Elapsed_Game <- goal_data$Seconds_Elapsed + (goal_data$Period - 1) * 60 * 20
 shift_matrix <- cbind(shift_matrix, 'GoalVector' = 0)
+num_goals <- length(goal_data$Game_Id)
 
 for (row in 1:(length(goal_data$Game_Id))) {
 
+    message(row)
     shift_matrix[shift_matrix[, 'Team'] == as.character(goal_data$Ev_Team[row]) & 
                     shift_matrix[, 'Game_Id'] == goal_data$Game_Id[row] & 
                     goal_data$Seconds_Elapsed_Game[row] > as.numeric(shift_matrix[, 'ShiftStart']) & 
@@ -85,7 +88,4 @@ for (row in 1:(length(goal_data$Game_Id))) {
 
 }
 
-
-modeldata <- as.data.frame(shift_matrix[, -((ncol(shift_matrix) - number_of_non_player_cols):ncol(shift_matrix)-1)])
-modeldata$GoalVector <- as.numeric(as.character(modeldata$GoalVector))
-model <- lm(GoalVector ~ ., data = modeldata)
+write.csv(shift_matrix, 'shift_matrix_20152016_withGoalVector.csv', row.names = F)
